@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth.js");
 const usersRoutes = require("./routes/users.js");
 const productsRoutes = require("./routes/products.js");
 const orderRouters = require("./routes/order.js");
+const categoriesRoutes = require("./routes/category.js");
 
 /* DEFAULT SETTINGS */
 dotenv.config();
@@ -26,6 +27,7 @@ app.use("/auth", authRoutes);
 app.use("/users", usersRoutes);
 app.use("/products", productsRoutes);
 app.use("/orders", orderRouters);
+app.use("categories", categoriesRoutes);
 
 const PORT = process.env.PORT || 6001;
 mongoose
