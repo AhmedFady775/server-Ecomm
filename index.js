@@ -27,7 +27,7 @@ app.use("/auth", authRoutes);
 app.use("/users", usersRoutes);
 app.use("/products", productsRoutes);
 app.use("/orders", orderRouters);
-app.use("categories", categoriesRoutes);
+app.use("/categories", categoriesRoutes);
 
 const PORT = process.env.PORT || 6001;
 mongoose
