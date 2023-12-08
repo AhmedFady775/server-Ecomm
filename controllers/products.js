@@ -2,13 +2,63 @@ const Product = require("../models/Product");
 
 const getProductsPaged = async (req, res) => {
   try {
-    const page = req.query.page || 1;
-    const perPage = req.query.perPage || 8;
-    const count = await Product.countDocuments({});
-    const products = await Product.find({})
-      .skip((page - 1) * parseInt(perPage))
-      .limit(parseInt(perPage));
-    res.status(200).json({ products, count: Math.ceil(count / perPage) });
+    const { query } = req;
+    const pageSize = query.pageSize || 8;
+    const page = query.page || 1;
+    const price = query.price || "";
+    const order = query.order || "";
+    const category = req.query.category || "";
+    const brand = req.query.brand || "";
+
+    const priceFilter =
+      price && price !== "all"
+        ? {
+            // 1-50
+            price: {
+              $gte: Number(price.split("-")[0]),
+              $lte: Number(price.split("-")[1]),
+            },
+          }
+        : {};
+    const sortOrder =
+      order === "featured"
+        ? { featured: -1 }
+        : order === "lowest"
+        ? { price: 1 }
+        : order === "highest"
+        ? { price: -1 }
+        : order === "newest"
+        ? { createdAt: -1 }
+        : { _id: -1 };
+
+    const categoryFilter = category && category !== "all" ? { category } : {};
+    const BrandFilter = brand && brand !== "all" ? { brand } : {};
+    const products = await Product.find({
+      ...categoryFilter,
+      ...priceFilter,
+      ...BrandFilter,
+    })
+      .sort(sortOrder)
+      .skip(pageSize * (page - 1))
+      .limit(pageSize);
+
+    const countProducts = await Product.countDocuments({
+      ...categoryFilter,
+      ...priceFilter,
+      ...BrandFilter,
+    });
+    const brands = await Product.find({
+      ...categoryFilter,
+      ...priceFilter,
+      ...BrandFilter,
+    }).distinct("brand");
+    res.status(200).json({
+      brands,
+      products,
+      countProducts,
+      page,
+      count: Math.ceil(countProducts / pageSize),
+    });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
